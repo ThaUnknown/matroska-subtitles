@@ -1,3 +1,4 @@
-import { inflate } from 'pako'
+const { inflate } = require('pako')
 
-export const inflateSync = (buffer) => inflate(buffer, { to: 'string' })
+const inflateSync = (buffer) => inflate(buffer, { to: 'string' })
+module.exports = { inflateSync }

@@ -1,7 +1,7 @@
-import { SubtitleParserBase } from './subtitle-parser-base'
-import { EbmlTagId } from 'ebml-stream'
+const SubtitleParserBase = require('./subtitle-parser-base')
+const { EbmlTagId } = require('ebml-stream')
 
-export class SubtitleStream extends SubtitleParserBase {
+class SubtitleStream extends SubtitleParserBase {
   constructor (prevInstance) {
     super()
 
@@ -51,3 +51,4 @@ export class SubtitleStream extends SubtitleParserBase {
     }
   }
 }
+module.exports = SubtitleStream

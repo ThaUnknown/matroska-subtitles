@@ -2,30 +2,22 @@
   "name": "matroska-subtitles",
   "version": "3.3.2",
   "description": "Streaming parser for embedded .mkv subtitles.",
-  "source": "src/index.js",
-  "main": "dist/matroska-subtitles.js",
-  "module": "dist/matroska-subtitles.module.js",
+  "main": "src/index.js",
   "dependencies": {
     "ebml-stream": "^1.0.3",
-    "pako": "^2.0.4",
-    "readable-stream": "^3.6.0"
+    "pako": "^2.0.4"
+  },
+  "browser": {
+    "zlib": "./src/inflateSyncWeb.js",
+    "process": "process-fast"
   },
   "devDependencies": {
     "buffer": "^6.0.3",
     "dev-null": "^0.1.1",
-    "microbundle": "^0.13.3",
-    "process-fast": "^1.0.0",
-    "standard": "^16.0.3",
-    "stream-browserify": "^3.0.0",
-    "webpack": "^5.53.0",
-    "webpack-cli": "^4.8.0"
+    "process-fast": "^1.0.0"
   },
   "scripts": {
-    "test": "standard && node tests/test.js",
-    "build": "microbundle --name=MatroskaSubtitles --target=node",
-    "bundle": "webpack",
-    "prepare": "npm run build && npm run bundle",
-    "prepublishOnly": "npm test"
+    "test": "node tests/test.js"
   },
   "keywords": [
     "mkv",

@@ -1,6 +1,6 @@
-import { PassThrough } from 'readable-stream'
-import { EbmlStreamDecoder, EbmlTagId } from 'ebml-stream'
-import { inflateSync } from 'zlib'
+const { PassThrough } = require('stream')
+const { EbmlStreamDecoder, EbmlTagId } = require('ebml-stream')
+const { inflateSync } = require('zlib')
 
 const SSA_TYPES = new Set(['ssa', 'ass'])
 const SSA_KEYS = ['readOrder', 'layer', 'style', 'name', 'marginL', 'marginR', 'marginV', 'effect', 'text']
@@ -12,7 +12,7 @@ function getData (chunk, tag) {
   return getChild(chunk, tag)?.data
 }
 
-export class SubtitleParserBase extends PassThrough {
+class SubtitleParserBase extends PassThrough {
   constructor () {
     super()
 
@@ -160,3 +160,4 @@ export class SubtitleParserBase extends PassThrough {
     this.emit('chapters', chapters)
   }
 }
+module.exports = SubtitleParserBase

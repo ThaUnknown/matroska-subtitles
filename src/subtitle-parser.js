@@ -1,7 +1,7 @@
-import { EbmlTagId } from 'ebml-stream'
-import { SubtitleParserBase } from './subtitle-parser-base'
+const { EbmlTagId } = require('ebml-stream')
+const SubtitleParserBase = require('./subtitle-parser-base')
 
-export class SubtitleParser extends SubtitleParserBase {
+class SubtitleParser extends SubtitleParserBase {
   constructor () {
     super()
 
@@ -18,3 +18,5 @@ export class SubtitleParser extends SubtitleParserBase {
     callback(null, chunk)
   }
 }
+
+module.exports = SubtitleParser
