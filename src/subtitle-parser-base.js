@@ -20,6 +20,8 @@ class SubtitleParserBase extends PassThrough {
     this.timecodeScale = 1
 
     this._currentClusterTimecode = null
+    this.duration = null
+    this.chapters = null
 
     this.decoder = new EbmlStreamDecoder({
       bufferTagIds: [
@@ -51,7 +53,12 @@ class SubtitleParserBase extends PassThrough {
       },
       // Duration for chapters which don't specify an end position
       [EbmlTagId.Duration]: ({ data }) => {
-        this.duration = data
+        if (this.chapters) {
+          this.chapters[this.chapters.length - 1].end = data
+          this.emit('chapters', this.chapters)
+        } else {
+          this.duration = data
+        }
       },
       [EbmlTagId.Tracks]: this.handleTracks.bind(this),
       [EbmlTagId.BlockGroup]: this.handleBlockGroup.bind(this),
@@ -157,7 +164,11 @@ class SubtitleParserBase extends PassThrough {
         language: getData(disp, EbmlTagId.ChapLanguage)
       }
     }
-    this.emit('chapters', chapters)
+    if (this.duration) {
+      this.emit('chapters', chapters)
+    } else {
+      this.chapters = chapters
+    }
   }
 }
 module.exports = SubtitleParserBase
