@@ -154,7 +154,7 @@ class SubtitleParserBase extends PassThrough {
     const chapters = []
     for (let i = atoms.length - 1; i >= 0; --i) {
       const start = getData(atoms[i], EbmlTagId.ChapterTimeStart) / this.timecodeScale / 1000000
-      const end = (getData(atoms[i], EbmlTagId.ChapterTimeEnd) / this.timecodeScale / 1000000) || chapters[i + 1]?.start || this.duration
+      const end = (getData(atoms[i], EbmlTagId.ChapterTimeEnd) / this.timecodeScale / 1000000)
       const disp = getChild(atoms[i], EbmlTagId.ChapterDisplay)
 
       chapters[i] = {
@@ -164,6 +164,12 @@ class SubtitleParserBase extends PassThrough {
         language: getData(disp, EbmlTagId.ChapLanguage)
       }
     }
+
+    chapters.sort((a, b) => a.start - b.start)
+    for (let i = chapters.length - 1; i >= 0; --i) {
+      chapters[i].end ||= chapters[i + 1]?.start || this.duration
+    }
+
     if (this.duration) {
       this.emit('chapters', chapters)
     } else {
