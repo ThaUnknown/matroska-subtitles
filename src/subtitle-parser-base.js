@@ -57,7 +57,7 @@ class SubtitleParserBase extends PassThrough {
         EbmlTagId.TimecodeScale,
         EbmlTagId.Tracks,
         EbmlTagId.BlockGroup,
-        EbmlTagId.AttachedFile,
+        EbmlTagId.Attachments,
         EbmlTagId.Chapters,
         EbmlTagId.Duration
       ]
@@ -75,7 +75,7 @@ class SubtitleParserBase extends PassThrough {
           transformedHead[tagName] = child.Seek.SeekPosition
         }
 
-        if (!transformedHead.Attachments) this.emit('no-files')
+        if (!transformedHead.Attachments) this.emit('attachments', [])
 
         this.seekHead = transformedHead
       },
@@ -88,12 +88,12 @@ class SubtitleParserBase extends PassThrough {
         this._currentClusterTimecode = data
       },
       // Parse attached files, mainly to allow extracting subtitle font files.
-      [EbmlTagId.AttachedFile]: chunk => {
-        this.emit('file', {
+      [EbmlTagId.Attachments]: ({ Children }) => {
+        this.emit('attachments', Children.map(chunk => ({
           filename: getData(chunk, EbmlTagId.FileName),
           mimetype: getData(chunk, EbmlTagId.FileMimeType),
           data: getData(chunk, EbmlTagId.FileData)
-        })
+        })))
       },
       // Duration for chapters which don't specify an end position
       [EbmlTagId.Duration]: ({ data }) => {
