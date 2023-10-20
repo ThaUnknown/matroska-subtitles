@@ -77,19 +77,19 @@ See [examples](https://github.com/mathiasvr/matroska-subtitles/tree/master/examp
 ```
 
 ## attached files
-The parser now also has a `file` event that emits embedded mkv files, mainly to be used to extract embedded subtitle fonts.
+The parser now also has a `attachments` event that emits embedded mkv files, mainly to be used to extract embedded subtitle fonts.
 
 ```js
-parser.on('file', file => console.log('file:', file))
+parser.on('attachments', files => console.log('files:', files))
 ```
 
 Output:
 ```js
-{
+[{
   filename: 'Arial.ttf',
   mimetype: 'application/x-truetype-font',
   data: Buffer() [Uint8Array]
-}
+}]
 ```
 
 ## random access

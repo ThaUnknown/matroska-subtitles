@@ -1,5 +1,5 @@
 const { PassThrough } = require('stream')
-const { EbmlStreamDecoder, EbmlTagId } = require('ebml-stream')
+const { EbmlStreamDecoder, EbmlTagId, EbmlElementType, Tools } = require('ebml-stream')
 const { inflateSync } = require('zlib')
 
 const SSA_TYPES = new Set(['ssa', 'ass'])
@@ -12,6 +12,33 @@ function getData (chunk, tag) {
   return getChild(chunk, tag)?.data
 }
 
+function readChildren (parent = {}, start = 0) {
+  const Children = []
+
+  if (!parent) throw new Error('Parent object is required')
+  if (!parent.Children) parent.Children = []
+
+  for (const Child of parent.Children) {
+    const childOutput = {}
+    const childName = EbmlTagId[Child.id] || Child.id
+    if (Child.Children && Child.Children.length > 0) {
+      const subChildren = readChildren(Child)
+      childOutput[childName] = subChildren.Children.reduce((acc, cur) => ({ ...acc, ...cur }), {})
+    } else {
+      if (Child.type === EbmlElementType.String || Child.type === EbmlElementType.UTF8 || Child.type == null) {
+        childOutput[childName] = Child.data.toString()
+      } else {
+        childOutput[childName] = Child.data
+      }
+    }
+    Children.push(childOutput)
+  }
+
+  delete parent._children
+  if (start) parent.absoluteStart = start
+  return { ...parent, Children }
+}
+
 class SubtitleParserBase extends PassThrough {
   constructor () {
     super()
@@ -22,9 +49,11 @@ class SubtitleParserBase extends PassThrough {
     this._currentClusterTimecode = null
     this.duration = null
     this.chapters = null
+    this.seekHead = {}
 
     this.decoder = new EbmlStreamDecoder({
       bufferTagIds: [
+        EbmlTagId.SeekHead,
         EbmlTagId.TimecodeScale,
         EbmlTagId.Tracks,
         EbmlTagId.BlockGroup,
@@ -35,6 +64,21 @@ class SubtitleParserBase extends PassThrough {
     })
 
     const tagMap = {
+      [EbmlTagId.SeekHead]: (seekHeadTags) => {
+        const seekHead = readChildren(seekHeadTags)
+
+        const transformedHead = {}
+
+        for (const child of seekHead.Children) {
+          if (!child.Seek) continue // CRC32 elements will appear, currently we don't check them
+          const tagName = EbmlTagId[Tools.readUnsigned(child.Seek.SeekID)]
+          transformedHead[tagName] = child.Seek.SeekPosition
+        }
+
+        if (!transformedHead.Attachments) this.emit('no-files')
+
+        this.seekHead = transformedHead
+      },
       // Segment Information
       [EbmlTagId.TimecodeScale]: ({ data }) => {
         this.timecodeScale = data / 1000000
